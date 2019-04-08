@@ -10,3 +10,4 @@ Packages used :
 
 ### Links
 - [Basic water using Shader Graph in Unity - PolyToots](https://youtu.be/uuzB93F39P8)
+- [Water normal map](https://blenderartists.org/t/animated-water-normal-map-tileable-looped/673140)
