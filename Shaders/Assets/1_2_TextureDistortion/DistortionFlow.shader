@@ -4,6 +4,8 @@
     {
         _Color ("Color", Color) = (1,1,1,1)
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
+		//1.3.1 : Flow Direction
+		[NoScaleOffset] _FlowMap ("Flow (RG)", 2D) = "black" {}
         _Glossiness ("Smoothness", Range(0,1)) = 0.5
         _Metallic ("Metallic", Range(0,1)) = 0.0
     }
@@ -16,7 +18,11 @@
         #pragma surface surf Standard fullforwardshadows	// Physically based Standard lighting model, and enable shadows on all light types
         #pragma target 3.0	// Use shader model 3.0 target, to get nicer looking lighting
 
-        sampler2D _MainTex;
+		//1.2.1 : Flowing UV 
+		#include "Flow.cginc"
+
+		//1.3.2 : Flow Direction
+        sampler2D _MainTex, _FlowMap;
 
         struct Input
         {
@@ -27,19 +33,16 @@
         half _Metallic;
         fixed4 _Color;
 
-        // Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
-        // See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
-        // #pragma instancing_options assumeuniformscaling
-        UNITY_INSTANCING_BUFFER_START(Props)
-            // put more per-instance properties here
-        UNITY_INSTANCING_BUFFER_END(Props)
-
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
-            // Albedo comes from a texture tinted by color
-            fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
+			//1.3.2 : Flow Direction
+			float2 flowVector = tex2D(_FlowMap, IN.uv_MainTex).rg;
+            //1.2.2 : Flowing UV
+			float2 uv = FlowUV(IN.uv_MainTex, _Time.y);
+            fixed4 c = tex2D (_MainTex, uv) * _Color;
             o.Albedo = c.rgb;
-            // Metallic and smoothness come from slider variables
+			//1.3.3 : Flow Direction
+			o.Albedo = float3(flowVector, 0);
             o.Metallic = _Metallic;
             o.Smoothness = _Glossiness;
             o.Alpha = c.a;
