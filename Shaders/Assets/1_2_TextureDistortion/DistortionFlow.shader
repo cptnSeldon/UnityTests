@@ -19,8 +19,9 @@
 		_FlowStrength ("Flow Strength", Float) = 1
 		//3.4.2 : Flow Offset
 		_FlowOffset ("Flow Offset", Float) = 0
-		//4.4.1 : Height Scale
-		_HeightScale ("Height Scale", Float) = 1
+		//4.4.1 : Height Scale Modulated
+		_HeightScale ("Height Scale, Constant", Float) = 0.25
+		_HeightScaleModulated ("Height Scale, Modulated", Float) = 0.75
 
         _Glossiness ("Smoothness", Range(0,1)) = 0.5
         _Metallic ("Metallic", Range(0,1)) = 0.0
@@ -40,8 +41,8 @@
 		//4.3.1 : Derivative Map
         sampler2D _MainTex, _FlowMap, _DerivHeightMap;
 		
-		//4.4.2 : Height Scale
-		float _UJump, _VJump, _Tiling, _Speed, _FlowStrength, _FlowOffset, _HeightScale;
+		//4.4.2 : Height Scale Modulated
+		float _UJump, _VJump, _Tiling, _Speed, _FlowStrength, _FlowOffset, _HeightScale, _HeightScaleModulated;
 
 		//4.3.2 : Derivative Map
 		float3 UnpackDerivativeHeight (float4 textureData) 
@@ -80,9 +81,11 @@
 			float3 uvwA = FlowUVW(IN.uv_MainTex, flowVector, jump, _FlowOffset, _Tiling, time, false);
 			float3 uvwB = FlowUVW(IN.uv_MainTex, flowVector, jump, _FlowOffset, _Tiling, time, true);
 
-			//4.4.2 : Height Scale
-			float3 dhA = UnpackDerivativeHeight(tex2D(_DerivHeightMap, uvwA.xy)) * (uvwA.z * _HeightScale);
-			float3 dhB = UnpackDerivativeHeight(tex2D(_DerivHeightMap, uvwB.xy)) * (uvwB.z * _HeightScale);
+			//4.4.2 : Height Scale Modulated
+			float finalHeightScale = length(flowVector) * _HeightScaleModulated + _HeightScale;
+
+			float3 dhA = UnpackDerivativeHeight(tex2D(_DerivHeightMap, uvwA.xy)) * (uvwA.z * finalHeightScale);
+			float3 dhB = UnpackDerivativeHeight(tex2D(_DerivHeightMap, uvwB.xy)) * (uvwB.z * finalHeightScale);
 			o.Normal = normalize(float3(-(dhA.xy + dhB.xy), 1));
 
 			fixed4 texA = tex2D(_MainTex, uvwA.xy) * uvwA.z;
