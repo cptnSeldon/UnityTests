@@ -35,14 +35,14 @@
 
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
-			//1.3.2 : Flow Direction
-			float2 flowVector = tex2D(_FlowMap, IN.uv_MainTex).rg;
-            //1.2.2 : Flowing UV
-			float2 uv = FlowUV(IN.uv_MainTex, _Time.y);
+			//1.3.2 : Flow Direction, 1.4.2 : Directed Sliding
+			float2 flowVector = tex2D(_FlowMap, IN.uv_MainTex).rg * - 1;
+            //1.2.2 : Flowing UV, 1.4.3 : Directed Sliding
+			float2 uv = FlowUV(IN.uv_MainTex, flowVector, _Time.y);
             fixed4 c = tex2D (_MainTex, uv) * _Color;
             o.Albedo = c.rgb;
 			//1.3.3 : Flow Direction
-			o.Albedo = float3(flowVector, 0);
+			//o.Albedo = float3(flowVector, 0);
             o.Metallic = _Metallic;
             o.Smoothness = _Glossiness;
             o.Alpha = c.a;
