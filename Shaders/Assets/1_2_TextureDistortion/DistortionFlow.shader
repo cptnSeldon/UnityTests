@@ -13,6 +13,8 @@
 		_Tiling ("Tiling", Float) = 1
 		//3.2.1 : Animation Speed
 		_Speed ("Speed", Float) = 1
+		//3.3.1 : Flow Strength
+		_FlowStrength ("Flow Strength", Float) = 1
 
         _Glossiness ("Smoothness", Range(0,1)) = 0.5
         _Metallic ("Metallic", Range(0,1)) = 0.0
@@ -32,8 +34,8 @@
 		//1.3.2 : Flow Direction
         sampler2D _MainTex, _FlowMap;
 		
-		//3.2.2 : Animation Speed
-		float _UJump, _VJump, _Tiling, _Speed;
+		//3.3.1 : Flow Strength
+		float _UJump, _VJump, _Tiling, _Speed, _FlowStrength;
 
         struct Input
         {
@@ -48,6 +50,9 @@
         {
 			//1.3.2 : Flow Direction, 1.4.2 : Directed Sliding
 			float2 flowVector = tex2D(_FlowMap, IN.uv_MainTex).rg * 2 - 1;
+
+			//3.3.2 : Flow Strength
+			flowVector *= _FlowStrength;
 
 			//2.3.1 : Time Offset
 			float noise = tex2D(_FlowMap, IN.uv_MainTex).a;
