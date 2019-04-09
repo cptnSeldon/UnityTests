@@ -15,6 +15,8 @@
 		_Speed ("Speed", Float) = 1
 		//3.3.1 : Flow Strength
 		_FlowStrength ("Flow Strength", Float) = 1
+		//3.4.2 : Flow Offset
+		_FlowOffset ("Flow Offset", Float) = 0
 
         _Glossiness ("Smoothness", Range(0,1)) = 0.5
         _Metallic ("Metallic", Range(0,1)) = 0.0
@@ -34,8 +36,8 @@
 		//1.3.2 : Flow Direction
         sampler2D _MainTex, _FlowMap;
 		
-		//3.3.1 : Flow Strength
-		float _UJump, _VJump, _Tiling, _Speed, _FlowStrength;
+		//3.4.2 : Flow Offset
+		float _UJump, _VJump, _Tiling, _Speed, _FlowStrength, _FlowOffset;
 
         struct Input
         {
@@ -61,9 +63,10 @@
 
 			//2.5.4: Jump
 			float2 jump = float2(_UJump, _VJump);
-			//3.1.5 : Tiling
-			float3 uvwA = FlowUVW(IN.uv_MainTex, flowVector, jump, _Tiling, time, false);
-			float3 uvwB = FlowUVW(IN.uv_MainTex, flowVector, jump, _Tiling, time, true);
+
+			//3.4.3 : Flow Offset
+			float3 uvwA = FlowUVW(IN.uv_MainTex, flowVector, jump, _FlowOffset, _Tiling, time, false);
+			float3 uvwB = FlowUVW(IN.uv_MainTex, flowVector, jump, _FlowOffset, _Tiling, time, true);
 
 			fixed4 texA = tex2D(_MainTex, uvwA.xy) * uvwA.z;
 			fixed4 texB = tex2D(_MainTex, uvwB.xy) * uvwB.z;
