@@ -42,18 +42,18 @@
 			//2.3.1 : Time Offset
 			float noise = tex2D(_FlowMap, IN.uv_MainTex).a;
 			float time = _Time.y + noise;
-			float3 uvw = FlowUVW(IN.uv_MainTex, flowVector, time);
+			//2.4.1 : Combining Two Distortions
+			float3 uvwA = FlowUVW(IN.uv_MainTex, flowVector, time, false);
+			float3 uvwB = FlowUVW(IN.uv_MainTex, flowVector, time, true);
 
-            //1.2.2 : Flowing UV, 1.4.3 : Directed Sliding
-			//float2 uv = FlowUV(IN.uv_MainTex, flowVector, _Time.y);
-			//fixed4 c = tex2D (_MainTex, uv) * _Color;
+			fixed4 texA = tex2D(_MainTex, uvwA.xy) * uvwA.z;
+			fixed4 texB = tex2D(_MainTex, uvwB.xy) * uvwB.z;
+
+			fixed4 c = (texA + texB) * _Color;
 
 			//2.1.3 : Blend Weight
-			//float3 uvw = FlowUV(IN.uv_MainTex, flowVector, _Time.y);
-            fixed4 c = tex2D(_MainTex, uvw.xy) * uvw.z * _Color;
+            //fixed4 c = tex2D(_MainTex, uvw.xy) * uvw.z * _Color;
             o.Albedo = c.rgb;
-			//1.3.3 : Flow Direction
-			//o.Albedo = float3(flowVector, 0);
             o.Metallic = _Metallic;
             o.Smoothness = _Glossiness;
             o.Alpha = c.a;
