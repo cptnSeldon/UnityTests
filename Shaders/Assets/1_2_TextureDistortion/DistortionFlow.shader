@@ -6,6 +6,8 @@
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
 		//2.3.1 : Time Offset - expecting noise in the flow map
 		[NoScaleOffset] _FlowMap("Flow (RG, A noise)", 2D) = "black" {}
+		//4.2.1 : Normal Map
+		[NoScaleOffset] _NormalMap ("Normals", 2D) = "bump" {}
 		//2.5.2: Jump
 		_UJump ("U jump per phase", Range(-0.25, 0.25)) = 0.25
 		_VJump ("V jump per phase", Range(-0.25, 0.25)) = -0.25
@@ -33,8 +35,8 @@
 		//1.2.1 : Flowing UV 
 		#include "Flow.cginc"
 
-		//1.3.2 : Flow Direction
-        sampler2D _MainTex, _FlowMap;
+		//4.2.2 : Normal Map
+        sampler2D _MainTex, _FlowMap, _NormalMap;
 		
 		//3.4.2 : Flow Offset
 		float _UJump, _VJump, _Tiling, _Speed, _FlowStrength, _FlowOffset;
@@ -67,6 +69,11 @@
 			//3.4.3 : Flow Offset
 			float3 uvwA = FlowUVW(IN.uv_MainTex, flowVector, jump, _FlowOffset, _Tiling, time, false);
 			float3 uvwB = FlowUVW(IN.uv_MainTex, flowVector, jump, _FlowOffset, _Tiling, time, true);
+
+			//4.2.3 : Normal Map
+			float3 normalA = UnpackNormal(tex2D(_NormalMap, uvwA.xy)) * uvwA.z;
+			float3 normalB = UnpackNormal(tex2D(_NormalMap, uvwB.xy)) * uvwB.z;
+			o.Normal = normalize(normalA + normalB);
 
 			fixed4 texA = tex2D(_MainTex, uvwA.xy) * uvwA.z;
 			fixed4 texB = tex2D(_MainTex, uvwB.xy) * uvwB.z;
