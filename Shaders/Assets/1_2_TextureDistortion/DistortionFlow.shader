@@ -11,6 +11,8 @@
 		_VJump ("V jump per phase", Range(-0.25, 0.25)) = -0.25
 		//3.1.3 : Tiling
 		_Tiling ("Tiling", Float) = 1
+		//3.2.1 : Animation Speed
+		_Speed ("Speed", Float) = 1
 
         _Glossiness ("Smoothness", Range(0,1)) = 0.5
         _Metallic ("Metallic", Range(0,1)) = 0.0
@@ -30,8 +32,8 @@
 		//1.3.2 : Flow Direction
         sampler2D _MainTex, _FlowMap;
 		
-		//3.1.4 : Tiling
-		float _UJump, _VJump, _Tiling;
+		//3.2.2 : Animation Speed
+		float _UJump, _VJump, _Tiling, _Speed;
 
         struct Input
         {
@@ -49,7 +51,8 @@
 
 			//2.3.1 : Time Offset
 			float noise = tex2D(_FlowMap, IN.uv_MainTex).a;
-			float time = _Time.y + noise;
+			//3.2.3 : Animation Speed
+			float time = _Time.y *_Speed + noise;
 
 			//2.5.4: Jump
 			float2 jump = float2(_UJump, _VJump);
