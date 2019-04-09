@@ -63,11 +63,13 @@
 
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
-			//1.3.2 : Flow Direction, 1.4.2 : Directed Sliding
-			float2 flowVector = tex2D(_FlowMap, IN.uv_MainTex).rg * 2 - 1;
+			//4.5.1 : Flow Plus Speed
+			float3 flow = tex2D(_FlowMap, IN.uv_MainTex).rgb;
+			flow.xy = flow.xy * 2 - 1;
+			flow *= _FlowStrength;
 
 			//3.3.2 : Flow Strength
-			flowVector *= _FlowStrength;
+			//flowVector *= _FlowStrength;
 
 			//2.3.1 : Time Offset
 			float noise = tex2D(_FlowMap, IN.uv_MainTex).a;
@@ -77,12 +79,11 @@
 			//2.5.4: Jump
 			float2 jump = float2(_UJump, _VJump);
 
-			//3.4.3 : Flow Offset
-			float3 uvwA = FlowUVW(IN.uv_MainTex, flowVector, jump, _FlowOffset, _Tiling, time, false);
-			float3 uvwB = FlowUVW(IN.uv_MainTex, flowVector, jump, _FlowOffset, _Tiling, time, true);
+			//4.5.1 : Flow Plus Speed
+			float3 uvwA = FlowUVW(IN.uv_MainTex, flow.xy, jump, _FlowOffset, _Tiling, time, false);
+			float3 uvwB = FlowUVW(IN.uv_MainTex, flow.xy, jump, _FlowOffset, _Tiling, time, true);
 
-			//4.4.2 : Height Scale Modulated
-			float finalHeightScale = length(flowVector) * _HeightScaleModulated + _HeightScale;
+			float finalHeightScale = flow.z * _HeightScaleModulated + _HeightScale;
 
 			float3 dhA = UnpackDerivativeHeight(tex2D(_DerivHeightMap, uvwA.xy)) * (uvwA.z * finalHeightScale);
 			float3 dhB = UnpackDerivativeHeight(tex2D(_DerivHeightMap, uvwB.xy)) * (uvwB.z * finalHeightScale);
@@ -96,7 +97,7 @@
             o.Albedo = c.rgb;
 			//4.3.4 : Derivative Map
 			//o.Albedo = dhA.z + dhB.z;
-			o.Albedo = pow(dhA.z + dhB.z, 2);
+			//o.Albedo = pow(dhA.z + dhB.z, 2);
 
             o.Metallic = _Metallic;
             o.Smoothness = _Glossiness;
