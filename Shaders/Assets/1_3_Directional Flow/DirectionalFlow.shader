@@ -6,10 +6,7 @@
 		[NoScaleOffset] _MainTex ("Deriv (AG) Height (B)", 2D) = "black" {}
 		[NoScaleOffset] _FlowMap ("Flow (RG)", 2D) = "black" {}
 		_Tiling ("Tiling", Float) = 1
-
-		//3.5 : Scaling the waves
 		_TilingModulated ("Tiling, Modulated", Float) = 1
-
 		_GridResolution ("Grid Resolution", Float) = 10
 		_Speed ("Speed", Float) = 1
 		_FlowStrength ("Flow Strength", Float) = 1
@@ -29,10 +26,7 @@
 		#include "DirectionalFlow.cginc"
 
 		sampler2D _MainTex, _FlowMap;
-
-		//3.5 : Scaling the waves
 		float _Tiling, _TilingModulated, _GridResolution, _Speed, _FlowStrength;
-
 		float _HeightScale, _HeightScaleModulated;
 
 		struct Input 
@@ -60,20 +54,21 @@
 		    float2x2 derivRotation;
 
 			float2 uvTiled = (floor(uv * _GridResolution + offset) + shift) / _GridResolution;
-			float3 flow = tex2D(_FlowMap, uvTiled).rgb;
-
+			
+			//4.1 : Nearly uniform flow
+			float3 flow = tex2D(_FlowMap, uvTiled * 0.1).rgb;
+			
 			flow.xy = flow.xy * 2 - 1;
 			flow.z *= _FlowStrength;
 
-			//3.5 : Scaling the waves
 			float tiling = flow.z * _TilingModulated + _Tiling;
 
-			float2 uvFlow = DirectionalFlowUV(uv, flow, tiling, time, derivRotation);
+			//4.1 : Nearly uniform flow
+			float2 uvFlow = DirectionalFlowUV(uv + offset, flow, tiling, time, derivRotation);
+			
 			float3 dh = UnpackDerivativeHeight(tex2D(_MainTex, uvFlow));
 
 			dh.xy = mul(derivRotation, dh.xy);
-
-			//3.5 : Scaling the waves
 			dh *= flow.z * _HeightScaleModulated + _HeightScale;
 
 			return dh;
