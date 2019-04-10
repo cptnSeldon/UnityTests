@@ -78,7 +78,15 @@
 			float3 dhC = FlowCell(uv, float2(0, 1), time);
 			float3 dhD = FlowCell(uv, float2(1, 1), time);
 
-			float2 t = abs(2 * frac(uv * _GridResolution) - 1);
+			float2 t = uv * _GridResolution;
+
+			if (gridB) 
+			{
+			    t += 0.25;
+			}
+
+			t = abs(2 * frac(t) - 1);
+
 			float wA = (1 - t.x) * (1 - t.y);
 			float wB = t.x * (1 - t.y);
 			float wC = (1 - t.x) * t.y;
