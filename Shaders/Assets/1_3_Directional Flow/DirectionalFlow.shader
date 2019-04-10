@@ -76,14 +76,12 @@
 			//3.3 : Overlapping cells
 			float3 dhC = FlowCell(uv, float2(0, 1), time);
 			float3 dhD = FlowCell(uv, float2(1, 1), time);
-			float2 t = abs(2 * frac(uv.x * _GridResolution) - 1);
 
-			float wA = 1 - t;
-			float wB = t;
-
-			//3.3 : Overlapping cells
-			float wC = 1 - t.x;
-			float wD = t.x;
+			float2 t = abs(2 * frac(uv * _GridResolution) - 1);
+			float wA = (1 - t.x) * (1 - t.y);
+			float wB = t.x * (1 - t.y);
+			float wC = (1 - t.x) * t.y;
+			float wD = t.x * t.y;
 
 			float3 dh = dhA * wA + dhB * wB + dhC * wC + dhD * wD;
 
