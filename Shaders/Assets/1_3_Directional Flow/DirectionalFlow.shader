@@ -6,6 +6,8 @@
 		[NoScaleOffset] _MainTex ("Deriv (AG) Height (B)", 2D) = "black" {}
 		[NoScaleOffset] _FlowMap ("Flow (RG)", 2D) = "black" {}
 		_Tiling ("Tiling", Float) = 1
+		//3.1 : Grid Resolution
+		_GridResolution ("Grid Resolution", Float) = 10
 		_Speed ("Speed", Float) = 1
 		_FlowStrength ("Flow Strength", Float) = 1
 		_HeightScale ("Height Scale, Constant", Float) = 0.25
@@ -24,7 +26,8 @@
 		#include "DirectionalFlow.cginc"
 
 		sampler2D _MainTex, _FlowMap;
-		float _Tiling, _Speed, _FlowStrength;
+		//3.1 : Grid Resolution
+		float _Tiling, _GridResolution, _Speed, _FlowStrength;
 		float _HeightScale, _HeightScaleModulated;
 
 		struct Input 
@@ -48,8 +51,10 @@
 			float time = _Time.y * _Speed;
 			float2x2 derivRotation;
 
-			//2.4 : Sampling the Row
-			float3 flow = tex2D(_FlowMap, IN.uv_MainTex).rgb;
+			//3.1 : Grid Resolution
+			float2 uvTiled = floor(IN.uv_MainTex * _GridResolution) / _GridResolution;
+
+			float3 flow = tex2D(_FlowMap, uvTiled).rgb;
 			flow.xy = flow.xy * 2 - 1;
 			flow.z *= _FlowStrength;
 
