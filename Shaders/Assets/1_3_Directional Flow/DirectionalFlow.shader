@@ -1,5 +1,7 @@
-﻿Shader "Custom/DirectionalFlow" {
-	Properties {
+﻿Shader "Custom/DirectionalFlow" 
+{
+	Properties 
+	{
 		_Color ("Color", Color) = (1,1,1,1)
 		[NoScaleOffset] _MainTex ("Deriv (AG) Height (B)", 2D) = "black" {}
 		[NoScaleOffset] _FlowMap ("Flow (RG)", 2D) = "black" {}
@@ -25,7 +27,8 @@
 		float _Tiling, _Speed, _FlowStrength;
 		float _HeightScale, _HeightScaleModulated;
 
-		struct Input {
+		struct Input 
+		{
 			float2 uv_MainTex;
 		};
 
@@ -33,15 +36,21 @@
 		half _Metallic;
 		fixed4 _Color;
 
-		float3 UnpackDerivativeHeight (float4 textureData) {
+		float3 UnpackDerivativeHeight (float4 textureData) 
+		{
 			float3 dh = textureData.agb;
 			dh.xy = dh.xy * 2 - 1;
 			return dh;
 		}
 
-		void surf (Input IN, inout SurfaceOutputStandard o) {
+		void surf (Input IN, inout SurfaceOutputStandard o) 
+		{
 			float time = _Time.y * _Speed;
-			float2 uvFlow = DirectionalFlowUV(IN.uv_MainTex, float2(0, 1), _Tiling, time);
+
+			//2.2 : Texture Rotation
+			float2 uvFlow = DirectionalFlowUV(IN.uv_MainTex, float2(sin(_Time.y), cos(_Time.y)), _Tiling, time);
+			float3 uvw = DirectionalFlowUVW(IN.uv_MainTex, float2(sin(_Time.y), cos(_Time.y)), _Tiling, time);
+			
 			float3 dh = UnpackDerivativeHeight(tex2D(_MainTex, uvFlow));
 			fixed4 c = dh.z * dh.z * _Color;
 
