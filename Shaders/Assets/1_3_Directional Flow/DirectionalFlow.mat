@@ -84,6 +84,7 @@ Material:
     - _GlossMapScale: 1
     - _Glossiness: 0.7
     - _GlossyReflections: 1
+    - _GridResolution: 10
     - _HeightScale: 0.1
     - _HeightScaleModulated: 9
     - _Metallic: 0

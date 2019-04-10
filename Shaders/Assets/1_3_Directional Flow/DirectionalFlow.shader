@@ -46,15 +46,12 @@
 
 		float3 FlowCell (float2 uv, float2 offset, float time) 
 		{	
-			//3.4 : Sampling at cell center
 			float2 shift = 1 - offset;
 		    shift *= 0.5;
-
 			offset *= 0.5;
 
 		    float2x2 derivRotation;
 
-			//3.4 : Sampling at cell center
 			float2 uvTiled = (floor(uv * _GridResolution + offset) + shift) / _GridResolution;
 			float3 flow = tex2D(_FlowMap, uvTiled).rgb;
 
@@ -65,6 +62,9 @@
 			float3 dh = UnpackDerivativeHeight(tex2D(_MainTex, uvFlow));
 
 			dh.xy = mul(derivRotation, dh.xy);
+
+			//3.5 : Scaling the waves
+			dh *= flow.z * _HeightScaleModulated + _HeightScale;
 
 			return dh;
 		}
