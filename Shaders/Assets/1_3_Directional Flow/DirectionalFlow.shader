@@ -6,7 +6,6 @@
 		[NoScaleOffset] _MainTex ("Deriv (AG) Height (B)", 2D) = "black" {}
 		[NoScaleOffset] _FlowMap ("Flow (RG)", 2D) = "black" {}
 		_Tiling ("Tiling", Float) = 1
-		//3.1 : Grid Resolution
 		_GridResolution ("Grid Resolution", Float) = 10
 		_Speed ("Speed", Float) = 1
 		_FlowStrength ("Flow Strength", Float) = 1
@@ -26,7 +25,6 @@
 		#include "DirectionalFlow.cginc"
 
 		sampler2D _MainTex, _FlowMap;
-		//3.1 : Grid Resolution
 		float _Tiling, _GridResolution, _Speed, _FlowStrength;
 		float _HeightScale, _HeightScaleModulated;
 
@@ -46,22 +44,27 @@
 			return dh;
 		}
 
-		void surf (Input IN, inout SurfaceOutputStandard o) 
-		{
-			float time = _Time.y * _Speed;
-			float2x2 derivRotation;
-
-			//3.1 : Grid Resolution
-			float2 uvTiled = floor(IN.uv_MainTex * _GridResolution) / _GridResolution;
-
+		//3.2 : Blending cells
+		float3 FlowCell (float2 uv, float time) {
+		    float2x2 derivRotation;
+			float2 uvTiled = floor(uv * _GridResolution) / _GridResolution;
 			float3 flow = tex2D(_FlowMap, uvTiled).rgb;
 			flow.xy = flow.xy * 2 - 1;
 			flow.z *= _FlowStrength;
-
-			float2 uvFlow = DirectionalFlowUV(IN.uv_MainTex, flow, _Tiling, time, derivRotation);
-			
+			float2 uvFlow = DirectionalFlowUV(uv, flow, _Tiling, time, derivRotation);
 			float3 dh = UnpackDerivativeHeight(tex2D(_MainTex, uvFlow));
 			dh.xy = mul(derivRotation, dh.xy);
+			return dh;
+		}
+
+		void surf (Input IN, inout SurfaceOutputStandard o) 
+		{
+			float time = _Time.y * _Speed;
+
+			//3.2 : Blending cells
+			float2 uv = IN.uv_MainTex;
+			float3 dh = FlowCell(uv, time);
+
 			fixed4 c = dh.z * dh.z * _Color;
 
 			o.Albedo = c.rgb;
