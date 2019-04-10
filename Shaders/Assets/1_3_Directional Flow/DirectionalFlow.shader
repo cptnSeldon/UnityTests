@@ -68,12 +68,13 @@
 			float3 dhB = FlowCell(uv, float2(1, 0), time);
 
 			float t = frac(uv.x * _GridResolution);
+			float wA = 1 - t;
+			float wB = t;
 
-			float3 dh = dhA * 0.5 + dhB * 0.5;
-
+			float3 dh = dhA * wA + dhB * wB;
 			fixed4 c = dh.z * dh.z * _Color;
 
-			o.Albedo = t; //c.rgb;
+			o.Albedo = c.rgb;
 			o.Normal = normalize(float3(-dh.xy, 1));
 			o.Metallic = _Metallic;
 			o.Smoothness = _Glossiness;
