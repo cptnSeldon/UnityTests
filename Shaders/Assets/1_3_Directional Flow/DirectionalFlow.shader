@@ -58,7 +58,10 @@
 			flow.xy = flow.xy * 2 - 1;
 			flow.z *= _FlowStrength;
 
-			float2 uvFlow = DirectionalFlowUV(uv, flow, _Tiling, time, derivRotation);
+			//3.5 : Scaling the waves
+			float tiling = flow.z * _Tiling;
+
+			float2 uvFlow = DirectionalFlowUV(uv, flow, tiling, time, derivRotation);
 			float3 dh = UnpackDerivativeHeight(tex2D(_MainTex, uvFlow));
 
 			dh.xy = mul(derivRotation, dh.xy);
