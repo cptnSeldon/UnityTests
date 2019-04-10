@@ -5,8 +5,13 @@
 		_Color ("Color", Color) = (1,1,1,1)
 		[NoScaleOffset] _MainTex ("Deriv (AG) Height (B)", 2D) = "black" {}
 		[NoScaleOffset] _FlowMap ("Flow (RG)", 2D) = "black" {}
-		_Tiling ("Tiling", Float) = 1
+
+		//4.4 : Optional Mixing
+		[Toggle(_DUAL_GRID)] _DualGrid ("Dual Grid", Int) = 0
+
+		_Tiling ("Tiling, Constant", Float) = 1
 		_TilingModulated ("Tiling, Modulated", Float) = 1
+
 		_GridResolution ("Grid Resolution", Float) = 10
 		_Speed ("Speed", Float) = 1
 		_FlowStrength ("Flow Strength", Float) = 1
@@ -22,6 +27,9 @@
 		CGPROGRAM
 		#pragma surface surf Standard fullforwardshadows
 		#pragma target 3.0
+
+		//4.4 : Optional Mixing
+		#pragma shader_feature _DUAL_GRID
 		
 		#include "DirectionalFlow.cginc"
 
@@ -45,7 +53,6 @@
 			return dh;
 		}
 
-		//4.3 : Mixing grids
 		float3 FlowCell (float2 uv, float2 offset, float time, float gridB) 
 		{	
 			float2 shift = 1 - offset;
@@ -62,7 +69,9 @@
 
 			float2 uvTiled = (floor(uv * _GridResolution + offset) + shift) / _GridResolution;
 			
-			float3 flow = tex2D(_FlowMap, uvTiled * 0.1).rgb;
+			//4.4 : Optional Mixing
+			float3 flow = tex2D(_FlowMap, uvTiled).rgb;
+
 			flow.xy = flow.xy * 2 - 1;
 			flow.z *= _FlowStrength;
 
@@ -77,7 +86,6 @@
 			return dh;
 		}
 
-		//4.3 : Mixing grids
 		float3 FlowGrid (float2 uv, float time, bool gridB) 
 		{
 		    float3 dhA = FlowCell(uv, float2(0, 0), time, gridB);
@@ -108,9 +116,12 @@
 
 			float2 uv = IN.uv_MainTex;
 
-			//4.3 : Mixing grids
 			float3 dh = FlowGrid(uv, time, false);
-			dh = (dh + FlowGrid(uv, time, true)) * 0.5;
+
+			//4.4 : Optional Mixing
+			#if defined(_DUAL_GRID)
+				dh = (dh + FlowGrid(uv, time, true)) * 0.5;
+			#endif
 			
 			fixed4 c = dh.z * dh.z * _Color;
 
