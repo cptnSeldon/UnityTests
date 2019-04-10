@@ -45,11 +45,18 @@
 			return dh;
 		}
 
-		float3 FlowCell (float2 uv, float2 offset, float time) 
+		//4.3 : Mixing grids
+		float3 FlowCell (float2 uv, float2 offset, float time, float gridB) 
 		{	
 			float2 shift = 1 - offset;
 		    shift *= 0.5;
 			offset *= 0.5;
+
+			if (gridB) 
+			{
+		        offset += 0.25;
+		        shift -= 0.25;
+		    }
 
 		    float2x2 derivRotation;
 
@@ -73,10 +80,10 @@
 		//4.3 : Mixing grids
 		float3 FlowGrid (float2 uv, float time, bool gridB) 
 		{
-		    float3 dhA = FlowCell(uv, float2(0, 0), time);
-			float3 dhB = FlowCell(uv, float2(1, 0), time);
-			float3 dhC = FlowCell(uv, float2(0, 1), time);
-			float3 dhD = FlowCell(uv, float2(1, 1), time);
+		    float3 dhA = FlowCell(uv, float2(0, 0), time, gridB);
+			float3 dhB = FlowCell(uv, float2(1, 0), time, gridB);
+			float3 dhC = FlowCell(uv, float2(0, 1), time, gridB);
+			float3 dhD = FlowCell(uv, float2(1, 1), time, gridB);
 
 			float2 t = uv * _GridResolution;
 
