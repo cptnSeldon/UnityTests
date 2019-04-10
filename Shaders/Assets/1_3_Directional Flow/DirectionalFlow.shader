@@ -71,7 +71,7 @@
 		}
 
 		//4.3 : Mixing grids
-		float3 FlowGrid (float2 uv, float time) 
+		float3 FlowGrid (float2 uv, float time, bool gridB) 
 		{
 		    float3 dhA = FlowCell(uv, float2(0, 0), time);
 			float3 dhB = FlowCell(uv, float2(1, 0), time);
@@ -94,7 +94,8 @@
 			float2 uv = IN.uv_MainTex;
 
 			//4.3 : Mixing grids
-			float3 dh = FlowGrid(uv, time);
+			float3 dh = FlowGrid(uv, time, false);
+			dh = (dh + FlowGrid(uv, time, true)) * 0.5;
 			
 			fixed4 c = dh.z * dh.z * _Color;
 
