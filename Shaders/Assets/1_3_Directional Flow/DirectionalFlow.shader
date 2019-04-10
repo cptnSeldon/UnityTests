@@ -46,13 +46,16 @@
 		void surf (Input IN, inout SurfaceOutputStandard o) 
 		{
 			float time = _Time.y * _Speed;
-			//2.3 : Rotating Derivatives
 			float2x2 derivRotation;
 
-			float2 uvFlow = DirectionalFlowUV(IN.uv_MainTex, float2(sin(_Time.y), cos(_Time.y)), _Tiling, time, derivRotation);
-			float3 uvw = DirectionalFlowUVW(IN.uv_MainTex, float2(sin(_Time.y), cos(_Time.y)), _Tiling, time, derivRotation);
+			//2.4 : Sampling the Row
+			float3 flow = tex2D(_FlowMap, IN.uv_MainTex).rgb;
+			flow.xy = flow.xy * 2 - 1;
+			flow.z *= _FlowStrength;
+
+			float2 uvFlow = DirectionalFlowUV(IN.uv_MainTex, flow, _Tiling, time, derivRotation);
 			
-			float3 dh = UnpackDerivativeHeight(tex2D(_MainTex, uvw));
+			float3 dh = UnpackDerivativeHeight(tex2D(_MainTex, uvFlow));
 			dh.xy = mul(derivRotation, dh.xy);
 			fixed4 c = dh.z * dh.z * _Color;
 
