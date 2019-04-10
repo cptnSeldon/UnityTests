@@ -45,9 +45,9 @@
 		}
 
 		//3.2 : Blending cells
-		float3 FlowCell (float2 uv, float time) {
+		float3 FlowCell (float2 uv, float2 offset, float time) {
 		    float2x2 derivRotation;
-			float2 uvTiled = floor(uv * _GridResolution) / _GridResolution;
+			float2 uvTiled = floor(uv * _GridResolution + offset) / _GridResolution;
 			float3 flow = tex2D(_FlowMap, uvTiled).rgb;
 			flow.xy = flow.xy * 2 - 1;
 			flow.z *= _FlowStrength;
@@ -63,11 +63,17 @@
 
 			//3.2 : Blending cells
 			float2 uv = IN.uv_MainTex;
-			float3 dh = FlowCell(uv, time);
+			
+			float3 dhA = FlowCell(uv, float2(0, 0), time);
+			float3 dhB = FlowCell(uv, float2(1, 0), time);
+
+			float t = frac(uv.x * _GridResolution);
+
+			float3 dh = dhA * 0.5 + dhB * 0.5;
 
 			fixed4 c = dh.z * dh.z * _Color;
 
-			o.Albedo = c.rgb;
+			o.Albedo = t; //c.rgb;
 			o.Normal = normalize(float3(-dh.xy, 1));
 			o.Metallic = _Metallic;
 			o.Smoothness = _Glossiness;
