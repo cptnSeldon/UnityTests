@@ -56,7 +56,7 @@
 			dh.xy = mul(derivRotation, dh.xy);
 			fixed4 c = dh.z * dh.z * _Color;
 
-			o.Albedo = dh; //c.rgb;
+			o.Albedo = c.rgb;
 			o.Normal = normalize(float3(-dh.xy, 1));
 			o.Metallic = _Metallic;
 			o.Smoothness = _Glossiness;
