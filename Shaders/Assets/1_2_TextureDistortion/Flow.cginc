@@ -1,7 +1,6 @@
 #if !defined(FLOW_INCLUDED)
 #define FLOW_INCLUDED
 
-//3.4.1 : Flow Offset
 float3 FlowUVW (float2 uv, float2 flowVector, float2 jump, float flowOffset, float tiling, float time, bool flowB)
 {
 	float phaseOffset = flowB ? 0.5 : 0;

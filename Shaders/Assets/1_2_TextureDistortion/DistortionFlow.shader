@@ -4,22 +4,15 @@
     {
         _Color ("Color", Color) = (1,1,1,1)
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
-		//2.3.1 : Time Offset - expecting noise in the flow map
 		[NoScaleOffset] _FlowMap("Flow (RG, A noise)", 2D) = "black" {}
-		//4.3.1 : Derivative Map -> cheaper to compute than normal maps
 		[NoScaleOffset] _DerivHeightMap ("Deriv (AG) Height (B)", 2D) = "black" {}
-		//2.5.2: Jump
+
 		_UJump ("U jump per phase", Range(-0.25, 0.25)) = 0.25
 		_VJump ("V jump per phase", Range(-0.25, 0.25)) = -0.25
-		//3.1.3 : Tiling
 		_Tiling ("Tiling", Float) = 1
-		//3.2.1 : Animation Speed
 		_Speed ("Speed", Float) = 1
-		//3.3.1 : Flow Strength
 		_FlowStrength ("Flow Strength", Float) = 1
-		//3.4.2 : Flow Offset
 		_FlowOffset ("Flow Offset", Float) = 0
-		//4.4.1 : Height Scale Modulated
 		_HeightScale ("Height Scale, Constant", Float) = 0.25
 		_HeightScaleModulated ("Height Scale, Modulated", Float) = 0.75
 
@@ -35,16 +28,12 @@
         #pragma surface surf Standard fullforwardshadows
         #pragma target 3.0
 
-		//1.2.1 : Flowing UV 
 		#include "Flow.cginc"
 
-		//4.3.1 : Derivative Map
         sampler2D _MainTex, _FlowMap, _DerivHeightMap;
 		
-		//4.4.2 : Height Scale Modulated
 		float _UJump, _VJump, _Tiling, _Speed, _FlowStrength, _FlowOffset, _HeightScale, _HeightScaleModulated;
 
-		//4.3.2 : Derivative Map
 		float3 UnpackDerivativeHeight (float4 textureData) 
 		{
 			float3 dh = textureData.agb;
@@ -63,23 +52,14 @@
 
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
-			//4.5.1 : Flow Plus Speed
 			float3 flow = tex2D(_FlowMap, IN.uv_MainTex).rgb;
 			flow.xy = flow.xy * 2 - 1;
 			flow *= _FlowStrength;
 
-			//3.3.2 : Flow Strength
-			//flowVector *= _FlowStrength;
-
-			//2.3.1 : Time Offset
 			float noise = tex2D(_FlowMap, IN.uv_MainTex).a;
-			//3.2.3 : Animation Speed
 			float time = _Time.y *_Speed + noise;
-
-			//2.5.4: Jump
 			float2 jump = float2(_UJump, _VJump);
 
-			//4.5.1 : Flow Plus Speed
 			float3 uvwA = FlowUVW(IN.uv_MainTex, flow.xy, jump, _FlowOffset, _Tiling, time, false);
 			float3 uvwB = FlowUVW(IN.uv_MainTex, flow.xy, jump, _FlowOffset, _Tiling, time, true);
 
@@ -95,10 +75,6 @@
 			fixed4 c = (texA + texB) * _Color;
 
             o.Albedo = c.rgb;
-			//4.3.4 : Derivative Map
-			//o.Albedo = dhA.z + dhB.z;
-			//o.Albedo = pow(dhA.z + dhB.z, 2);
-
             o.Metallic = _Metallic;
             o.Smoothness = _Glossiness;
             o.Alpha = c.a;
