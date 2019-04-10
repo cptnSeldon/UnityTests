@@ -44,16 +44,23 @@
 			return dh;
 		}
 
-		//3.2 : Blending cells
-		float3 FlowCell (float2 uv, float2 offset, float time) {
+		float3 FlowCell (float2 uv, float2 offset, float time) 
+		{	
+			//3.3 : Overlapping cells
+			offset *= 0.5;
+
 		    float2x2 derivRotation;
 			float2 uvTiled = floor(uv * _GridResolution + offset) / _GridResolution;
 			float3 flow = tex2D(_FlowMap, uvTiled).rgb;
+
 			flow.xy = flow.xy * 2 - 1;
 			flow.z *= _FlowStrength;
+
 			float2 uvFlow = DirectionalFlowUV(uv, flow, _Tiling, time, derivRotation);
 			float3 dh = UnpackDerivativeHeight(tex2D(_MainTex, uvFlow));
+
 			dh.xy = mul(derivRotation, dh.xy);
+
 			return dh;
 		}
 
@@ -61,17 +68,25 @@
 		{
 			float time = _Time.y * _Speed;
 
-			//3.2 : Blending cells
 			float2 uv = IN.uv_MainTex;
 			
 			float3 dhA = FlowCell(uv, float2(0, 0), time);
 			float3 dhB = FlowCell(uv, float2(1, 0), time);
 
-			float t = frac(uv.x * _GridResolution);
+			//3.3 : Overlapping cells
+			float3 dhC = FlowCell(uv, float2(0, 1), time);
+			float3 dhD = FlowCell(uv, float2(1, 1), time);
+			float2 t = abs(2 * frac(uv.x * _GridResolution) - 1);
+
 			float wA = 1 - t;
 			float wB = t;
 
-			float3 dh = dhA * wA + dhB * wB;
+			//3.3 : Overlapping cells
+			float wC = 1 - t.x;
+			float wD = t.x;
+
+			float3 dh = dhA * wA + dhB * wB + dhC * wC + dhD * wD;
+
 			fixed4 c = dh.z * dh.z * _Color;
 
 			o.Albedo = c.rgb;
