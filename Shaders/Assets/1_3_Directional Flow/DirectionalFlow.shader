@@ -46,11 +46,16 @@
 
 		float3 FlowCell (float2 uv, float2 offset, float time) 
 		{	
-			//3.3 : Overlapping cells
+			//3.4 : Sampling at cell center
+			float2 shift = 1 - offset;
+		    shift *= 0.5;
+
 			offset *= 0.5;
 
 		    float2x2 derivRotation;
-			float2 uvTiled = floor(uv * _GridResolution + offset) / _GridResolution;
+
+			//3.4 : Sampling at cell center
+			float2 uvTiled = (floor(uv * _GridResolution + offset) + shift) / _GridResolution;
 			float3 flow = tex2D(_FlowMap, uvTiled).rgb;
 
 			flow.xy = flow.xy * 2 - 1;
@@ -72,12 +77,11 @@
 			
 			float3 dhA = FlowCell(uv, float2(0, 0), time);
 			float3 dhB = FlowCell(uv, float2(1, 0), time);
-
-			//3.3 : Overlapping cells
 			float3 dhC = FlowCell(uv, float2(0, 1), time);
 			float3 dhD = FlowCell(uv, float2(1, 1), time);
 
 			float2 t = abs(2 * frac(uv * _GridResolution) - 1);
+
 			float wA = (1 - t.x) * (1 - t.y);
 			float wB = t.x * (1 - t.y);
 			float wC = (1 - t.x) * t.y;
