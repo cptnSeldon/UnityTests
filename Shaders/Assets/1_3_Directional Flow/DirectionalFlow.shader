@@ -46,15 +46,17 @@
 		void surf (Input IN, inout SurfaceOutputStandard o) 
 		{
 			float time = _Time.y * _Speed;
+			//2.3 : Rotating Derivatives
+			float2x2 derivRotation;
 
-			//2.2 : Texture Rotation
-			float2 uvFlow = DirectionalFlowUV(IN.uv_MainTex, float2(sin(_Time.y), cos(_Time.y)), _Tiling, time);
-			float3 uvw = DirectionalFlowUVW(IN.uv_MainTex, float2(sin(_Time.y), cos(_Time.y)), _Tiling, time);
+			float2 uvFlow = DirectionalFlowUV(IN.uv_MainTex, float2(sin(_Time.y), cos(_Time.y)), _Tiling, time, derivRotation);
+			float3 uvw = DirectionalFlowUVW(IN.uv_MainTex, float2(sin(_Time.y), cos(_Time.y)), _Tiling, time, derivRotation);
 			
-			float3 dh = UnpackDerivativeHeight(tex2D(_MainTex, uvFlow));
+			float3 dh = UnpackDerivativeHeight(tex2D(_MainTex, uvw));
+			dh.xy = mul(derivRotation, dh.xy);
 			fixed4 c = dh.z * dh.z * _Color;
 
-			o.Albedo = c.rgb;
+			o.Albedo = dh; //c.rgb;
 			o.Normal = normalize(float3(-dh.xy, 1));
 			o.Metallic = _Metallic;
 			o.Smoothness = _Glossiness;
