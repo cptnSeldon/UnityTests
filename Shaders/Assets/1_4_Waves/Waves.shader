@@ -7,8 +7,10 @@
 		_Glossiness ("Smoothness", Range(0,1)) = 0.5
 		_Metallic ("Metallic", Range(0,1)) = 0.0
 
-		//1.3 : Amplitude
 		_Amplitude ("Amplitude", Float) = 1
+
+		//1.4 : Wavelength
+		_Wavelength ("Wavelength", Float) = 10
 	}
 	SubShader {
 		Tags { "RenderType"="Opaque" }
@@ -25,20 +27,20 @@
 			float2 uv_MainTex;
 		};
 
-		//1.3 : Amplitude
-		float _Amplitude;
+		//1.4 : Wavelength
+		float _Amplitude, _Wavelength;
 
 		half _Glossiness;
 		half _Metallic;
 		fixed4 _Color;
 
-		//1.2 : Adjusting Y
 		void vert(inout appdata_full vertexData) 
 		{
 			float3 p = vertexData.vertex.xyz;
 
-			//1.3 : Amplitude
-			p.y = _Amplitude * sin(p.x);
+			//1.4 : Wavelength
+			float k = 2 * UNITY_PI / _Wavelength;
+			p.y = _Amplitude * sin(k * p.x);
 
 			vertexData.vertex.xyz = p;
 		}
