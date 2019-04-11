@@ -6,6 +6,9 @@
 		_MainTex ("Albedo (RGB)", 2D) = "white" {}
 		_Glossiness ("Smoothness", Range(0,1)) = 0.5
 		_Metallic ("Metallic", Range(0,1)) = 0.0
+
+		//1.3 : Amplitude
+		_Amplitude ("Amplitude", Float) = 1
 	}
 	SubShader {
 		Tags { "RenderType"="Opaque" }
@@ -22,14 +25,21 @@
 			float2 uv_MainTex;
 		};
 
+		//1.3 : Amplitude
+		float _Amplitude;
+
 		half _Glossiness;
 		half _Metallic;
 		fixed4 _Color;
 
+		//1.2 : Adjusting Y
 		void vert(inout appdata_full vertexData) 
 		{
 			float3 p = vertexData.vertex.xyz;
-			p.y = sin(p.x);
+
+			//1.3 : Amplitude
+			p.y = _Amplitude * sin(p.x);
+
 			vertexData.vertex.xyz = p;
 		}
 
