@@ -8,9 +8,10 @@
 		_Metallic ("Metallic", Range(0,1)) = 0.0
 
 		_Amplitude ("Amplitude", Float) = 1
-
-		//1.4 : Wavelength
 		_Wavelength ("Wavelength", Float) = 10
+
+		//1.5 : Speed
+		_Speed ("Speed", Float) = 1
 	}
 	SubShader {
 		Tags { "RenderType"="Opaque" }
@@ -27,8 +28,8 @@
 			float2 uv_MainTex;
 		};
 
-		//1.4 : Wavelength
-		float _Amplitude, _Wavelength;
+		//1.5 : Speed
+		float _Amplitude, _Wavelength, _Speed;
 
 		half _Glossiness;
 		half _Metallic;
@@ -38,9 +39,10 @@
 		{
 			float3 p = vertexData.vertex.xyz;
 
-			//1.4 : Wavelength
 			float k = 2 * UNITY_PI / _Wavelength;
-			p.y = _Amplitude * sin(k * p.x);
+
+			//1.5 : Speed
+			p.y = _Amplitude * sin(k * (p.x - _Speed * _Time.y));
 
 			vertexData.vertex.xyz = p;
 		}
