@@ -9,8 +9,6 @@
 
 		_Amplitude ("Amplitude", Float) = 1
 		_Wavelength ("Wavelength", Float) = 10
-
-		//1.5 : Speed
 		_Speed ("Speed", Float) = 1
 	}
 	SubShader {
@@ -28,9 +26,7 @@
 			float2 uv_MainTex;
 		};
 
-		//1.5 : Speed
 		float _Amplitude, _Wavelength, _Speed;
-
 		half _Glossiness;
 		half _Metallic;
 		fixed4 _Color;
@@ -38,13 +34,17 @@
 		void vert(inout appdata_full vertexData) 
 		{
 			float3 p = vertexData.vertex.xyz;
-
 			float k = 2 * UNITY_PI / _Wavelength;
 
-			//1.5 : Speed
-			p.y = _Amplitude * sin(k * (p.x - _Speed * _Time.y));
+			//1.6 : Normal Vector
+			float f = k * (p.x - _Speed * _Time.y);
+			p.y = _Amplitude * sin(f);
+
+			float3 tangent = normalize(float3(1, k * _Amplitude * cos(f), 0));
+			float3 normal = float3(-tangent.y, tangent.x, 0);
 
 			vertexData.vertex.xyz = p;
+			vertexData.normal = normal;
 		}
 
 		void surf (Input IN, inout SurfaceOutputStandard o) 
