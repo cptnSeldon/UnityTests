@@ -7,8 +7,10 @@
 		_Glossiness ("Smoothness", Range(0,1)) = 0.5
 		_Metallic ("Metallic", Range(0,1)) = 0.0
 
-		//4.1 : Multiple Waves - Single parameters vector
 		_WaveA ("Wave A (dir, steepness, wavelength)", Vector) = (1,0,0.5,10)
+
+		//4.2 : Two waves
+		_WaveB ("Wave B", Vector) = (0,1,0.25,20)
 	}
 	SubShader {
 		Tags { "RenderType"="Opaque" }
@@ -25,14 +27,13 @@
 			float2 uv_MainTex;
 		};
 
-		//4.1 : Multiple Waves - Single parameters vector
-		float4 _WaveA;
+		//4.2 : Two waves
+		float4 _WaveA, _WaveB;
 
 		half _Glossiness;
 		half _Metallic;
 		fixed4 _Color;
 
-		//4.1 : Multiple Waves - Single parameters vector
 		float3 GerstnerWave (float4 wave, float3 p, inout float3 tangent, inout float3 binormal) 
 		{
 		    float steepness = wave.z;
@@ -56,8 +57,10 @@
 			float3 binormal = float3(0, 0, 1);
 			float3 p = gridPoint;
 
+			//4.2 : Two waves
 			p += GerstnerWave(_WaveA, gridPoint, tangent, binormal);
-			
+			p += GerstnerWave(_WaveB, gridPoint, tangent, binormal);
+
 			float3 normal = normalize(cross(binormal, tangent));
 			
 			vertexData.vertex.xyz = p;
