@@ -7,16 +7,19 @@
 		_Glossiness ("Smoothness", Range(0,1)) = 0.5
 		_Metallic ("Metallic", Range(0,1)) = 0.0
 
-		_Amplitude ("Amplitude", Float) = 1
+		//2.3 : Preventing Loops
+		_Steepness ("Steepness", Range(0, 1)) = 0.5
+
 		_Wavelength ("Wavelength", Float) = 10
-		_Speed ("Speed", Float) = 1
+
+		//3.1 : Wave direction - direction vector
+		_Direction ("Direction (2D)", Vector) = (1,0,0,0)
 	}
 	SubShader {
 		Tags { "RenderType"="Opaque" }
 		LOD 200
 
 		CGPROGRAM
-		//1.8 : Shadows
 		#pragma surface surf Standard fullforwardshadows vertex:vert addshadow
 		#pragma target 3.0
 
@@ -27,7 +30,12 @@
 			float2 uv_MainTex;
 		};
 
-		float _Amplitude, _Wavelength, _Speed;
+		//2.3 : Preventing Loops
+		float _Steepness, _Wavelength;
+
+		//3.1 : Wave direction - direction vector
+		float2 _Direction;
+
 		half _Glossiness;
 		half _Metallic;
 		fixed4 _Color;
@@ -36,13 +44,16 @@
 		{
 			float3 p = vertexData.vertex.xyz;
 			float k = 2 * UNITY_PI / _Wavelength;
-			float f = k * (p.x - _Speed * _Time.y);
+			float c = sqrt(9.8 / k);
+			float2 d = normalize(_Direction);
+			float f = k * (dot(d, p.xz) - c * _Time.y);
+			float a = _Steepness / k;
 
-			p.x += _Amplitude * cos(f);
-			p.y = _Amplitude * sin(f);
+			p.x += d.x * (a * cos(f));
+			p.y = a * sin(f);
+			p.z += d.y * (a * cos(f));
 
-			//2.2 : Normals
-			float3 tangent = normalize(float3(1 - k * _Amplitude * sin(f), k * _Amplitude * cos(f), 0));
+			float3 tangent = normalize(float3( 1 - _Steepness * sin(f), _Steepness * cos(f), 0));
 			
 			float3 normal = float3(-tangent.y, tangent.x, 0);
 
