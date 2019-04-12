@@ -7,9 +7,8 @@
 		_Glossiness ("Smoothness", Range(0,1)) = 0.5
 		_Metallic ("Metallic", Range(0,1)) = 0.0
 
-		_Steepness ("Steepness", Range(0, 1)) = 0.5
-		_Wavelength ("Wavelength", Float) = 10
-		_Direction ("Direction (2D)", Vector) = (1,0,0,0)
+		//4.1 : Multiple Waves - Single parameters vector
+		_WaveA ("Wave A (dir, steepness, wavelength)", Vector) = (1,0,0.5,10)
 	}
 	SubShader {
 		Tags { "RenderType"="Opaque" }
@@ -26,30 +25,41 @@
 			float2 uv_MainTex;
 		};
 
-		float _Steepness, _Wavelength;
-		float2 _Direction;
+		//4.1 : Multiple Waves - Single parameters vector
+		float4 _WaveA;
+
 		half _Glossiness;
 		half _Metallic;
 		fixed4 _Color;
 
+		//4.1 : Multiple Waves - Single parameters vector
+		float3 GerstnerWave (float4 wave, float3 p, inout float3 tangent, inout float3 binormal) 
+		{
+		    float steepness = wave.z;
+		    float wavelength = wave.w;
+		    float k = 2 * UNITY_PI / wavelength;
+			float c = sqrt(9.8 / k);
+			float2 d = normalize(wave.xy);
+			float f = k * (dot(d, p.xz) - c * _Time.y);
+			float a = steepness / k;
+
+			tangent += float3(-d.x * d.x * (steepness * sin(f)), d.x * (steepness * cos(f)), d.x * d.y * (steepness * sin(f)));
+			binormal += float3(-d.x * d.y * (steepness * sin(f)), d.y * (steepness * cos(f)), -d.y * d.y * (steepness * sin(f)));
+
+			return float3(d.x * (a * cos(f)), a * sin(f), d.y * (a * cos(f)));
+		}
+
 		void vert(inout appdata_full vertexData) 
 		{
-			float3 p = vertexData.vertex.xyz;
-			float k = 2 * UNITY_PI / _Wavelength;
-			float c = sqrt(9.8 / k);
-			float2 d = normalize(_Direction);
-			float f = k * (dot(d, p.xz) - c * _Time.y);
-			float a = _Steepness / k;
+			float3 gridPoint = vertexData.vertex.xyz;
+			float3 tangent = float3(1, 0, 0);
+			float3 binormal = float3(0, 0, 1);
+			float3 p = gridPoint;
 
-			p.x += d.x * (a * cos(f));
-			p.y = a * sin(f);
-			p.z += d.y * (a * cos(f));
-
-			//3.2 : Normal Vectors
-			float3 tangent = float3( 1 - d.x * d.x * (_Steepness * sin(f)), d.x * (_Steepness * cos(f)), -d.x * d.y * (_Steepness * sin(f)));
-			float3 binormal = float3(-d.x * d.y * (_Steepness * sin(f)), d.y * (_Steepness * cos(f)), 1 - d.y * d.y * (_Steepness * sin(f)));
+			p += GerstnerWave(_WaveA, gridPoint, tangent, binormal);
+			
 			float3 normal = normalize(cross(binormal, tangent));
-
+			
 			vertexData.vertex.xyz = p;
 			vertexData.normal = normal;
 		}
