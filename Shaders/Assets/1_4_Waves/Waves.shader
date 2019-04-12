@@ -38,6 +38,9 @@
 			float k = 2 * UNITY_PI / _Wavelength;
 			float f = k * (p.x - _Speed * _Time.y);
 
+			//2.1 : Gerstner waves - Moving back and Forth
+			p.x += _Amplitude * cos(f);
+
 			p.y = _Amplitude * sin(f);
 
 			float3 tangent = normalize(float3(1, k * _Amplitude * cos(f), 0));
