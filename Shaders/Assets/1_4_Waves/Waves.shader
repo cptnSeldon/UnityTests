@@ -16,7 +16,8 @@
 		LOD 200
 
 		CGPROGRAM
-		#pragma surface surf Standard fullforwardshadows vertex:vert
+		//1.8 : Shadows
+		#pragma surface surf Standard fullforwardshadows vertex:vert addshadow
 		#pragma target 3.0
 
 		sampler2D _MainTex;
@@ -35,9 +36,8 @@
 		{
 			float3 p = vertexData.vertex.xyz;
 			float k = 2 * UNITY_PI / _Wavelength;
-
-			//1.6 : Normal Vector
 			float f = k * (p.x - _Speed * _Time.y);
+
 			p.y = _Amplitude * sin(f);
 
 			float3 tangent = normalize(float3(1, k * _Amplitude * cos(f), 0));
