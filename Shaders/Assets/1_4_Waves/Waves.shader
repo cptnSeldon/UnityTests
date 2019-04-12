@@ -7,12 +7,8 @@
 		_Glossiness ("Smoothness", Range(0,1)) = 0.5
 		_Metallic ("Metallic", Range(0,1)) = 0.0
 
-		//2.3 : Preventing Loops
 		_Steepness ("Steepness", Range(0, 1)) = 0.5
-
 		_Wavelength ("Wavelength", Float) = 10
-
-		//3.1 : Wave direction - direction vector
 		_Direction ("Direction (2D)", Vector) = (1,0,0,0)
 	}
 	SubShader {
@@ -30,12 +26,8 @@
 			float2 uv_MainTex;
 		};
 
-		//2.3 : Preventing Loops
 		float _Steepness, _Wavelength;
-
-		//3.1 : Wave direction - direction vector
 		float2 _Direction;
-
 		half _Glossiness;
 		half _Metallic;
 		fixed4 _Color;
@@ -53,9 +45,10 @@
 			p.y = a * sin(f);
 			p.z += d.y * (a * cos(f));
 
-			float3 tangent = normalize(float3( 1 - _Steepness * sin(f), _Steepness * cos(f), 0));
-			
-			float3 normal = float3(-tangent.y, tangent.x, 0);
+			//3.2 : Normal Vectors
+			float3 tangent = float3( 1 - d.x * d.x * (_Steepness * sin(f)), d.x * (_Steepness * cos(f)), -d.x * d.y * (_Steepness * sin(f)));
+			float3 binormal = float3(-d.x * d.y * (_Steepness * sin(f)), d.y * (_Steepness * cos(f)), 1 - d.y * d.y * (_Steepness * sin(f)));
+			float3 normal = normalize(cross(binormal, tangent));
 
 			vertexData.vertex.xyz = p;
 			vertexData.normal = normal;
