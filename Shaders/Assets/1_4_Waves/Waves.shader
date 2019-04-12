@@ -8,9 +8,10 @@
 		_Metallic ("Metallic", Range(0,1)) = 0.0
 
 		_WaveA ("Wave A (dir, steepness, wavelength)", Vector) = (1,0,0.5,10)
-
 		//4.2 : Two waves
 		_WaveB ("Wave B", Vector) = (0,1,0.25,20)
+		//4.5 : Three waves
+		_WaveC ("Wave C", Vector) = (1,1,0.15,10)
 	}
 	SubShader {
 		Tags { "RenderType"="Opaque" }
@@ -27,8 +28,8 @@
 			float2 uv_MainTex;
 		};
 
-		//4.2 : Two waves
-		float4 _WaveA, _WaveB;
+		//4.5 : Three waves
+		float4 _WaveA, _WaveB, _WaveC;
 
 		half _Glossiness;
 		half _Metallic;
@@ -57,9 +58,10 @@
 			float3 binormal = float3(0, 0, 1);
 			float3 p = gridPoint;
 
-			//4.2 : Two waves
+			//4.5 : Three waves
 			p += GerstnerWave(_WaveA, gridPoint, tangent, binormal);
 			p += GerstnerWave(_WaveB, gridPoint, tangent, binormal);
+			p += GerstnerWave(_WaveC, gridPoint, tangent, binormal);
 
 			float3 normal = normalize(cross(binormal, tangent));
 			
